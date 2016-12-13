@@ -26,11 +26,14 @@ function objectIterator(object, callback) {
 
 
 export class PugRuntime {
-  event(value) {
+  event(context, value) {
     return value
   }
   element(tagName, properties) {
     return Object.assign({tagName}, properties)
+  }
+  handle(context, handle, element) {
+    context[handle] = element
   }
   text(text) {
     return text != null ? text : ''

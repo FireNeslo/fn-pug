@@ -7,5 +7,5 @@ export default function pug(src, opts) {
 }
 
 export function compileClient(code, runtime) {
-  return Function(['__RUNTIME__'], 'return ' + pug(code).code)(runtime)
+  return Function(['$$'], 'return ' + pug(code).code)(runtime)
 }

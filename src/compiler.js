@@ -1,5 +1,8 @@
+import transformContext from './helpers/transform-context'
+
+
 export class Compiler {
-  compile(ast, options) {
+  compileSource(ast, options={}) {
     this.level = 0
     this.options = options
     this.ast = ast
@@ -14,6 +17,12 @@ export class Compiler {
           buffer('return __RESULT__.children').
         undent().
       buffer('}')
+  }
+  compile(tree, options) {
+    this.compileSource(tree)
+    const {code, ast} = transformContext(this.code, this.options.src)
+    console.log(code)
+    return Object.assign(this, {code, ast})
   }
   buffer(code, newline=true) {
     var indent = '  '.repeat(this.level)
@@ -44,7 +53,7 @@ export class Compiler {
     var object = each.obj
     var args = [each.val, each.key].filter(k => k)
 
-    this.buffer(`__RUNTIME__.each(${object}, (${args}) => {`).indent()
+    this.buffer(`$$.each(${object}, (${args}) => {`).indent()
     this.visit(each.block, context)
     this.undent().buffer('})')
 
@@ -54,30 +63,42 @@ export class Compiler {
     var node = `e$${this.uid++}`
     var name = JSON.stringify(tag.name)
 
-    this.buffer(`var ${node} = {children: [], events: {}, attributes: {}}`)
+    this.buffer(`var ${node} = {children: [], events: [], attributes: {}, class: {}, style: {}}`)
 
     this.visitAttributes(tag.attrs, node)
 
     if(tag.block) this.visit(tag.block, node)
 
-    var element = `__RUNTIME__.element(${name}, ${node})`
+    var element = `$$.element(${name}, ${node})`
 
-    this.buffer(`${context}.children.push(${element})`)
+    return this.buffer(`${context}.children.push(${element})`)
   }
   visitAttributes(attrs, context) {
     for(var {name, val} of attrs) {
       switch (name[0]) {
+        case "#":
+          var handle = JSON.stringify(name.slice(1))
+          this.buffer(`$$.handle(this, ${handle}, ${context})`)
+        break;
         case "(":
           var event = JSON.stringify(name.slice(1, -1))
-          var value = `__RUNTIME__.event(e => ${val})`
-          this.buffer(`${context}.events[${event}] = ${value}`)
+          var value = `$$.event(this, e => ${val})`
+          this.buffer(`${context}.events.push([${event}, ${value}])`)
           break;
         case "[":
-          this.buffer(`${context}.${name.slice(1, -1)} = ${val}`)
+          if(name[1] === '(') {
+            var key = name.slice(2, -2)
+            var event = JSON.stringify(key + 'Changed')
+            var value = `$$.event(this, e => ${val} = e.target.${key})`
+            this.buffer(`${context}.${key} = ${val}`)
+            this.buffer(`${context}.events.push([${event}, ${value}])`)
+          } else {
+            this.buffer(`${context}.${name.slice(1, -1)} = ${val}`)
+          }
           break;
         default:
           var attr = JSON.stringify(name)
-          var value = `__RUNTIME__.attr(${val})`
+          var value = `$$.attr(${val})`
           this.buffer(`${context}.attributes[${attr}] = ${value}`)
           break;
       }
@@ -91,7 +112,7 @@ export class Compiler {
   }
   visitCode(code, context) {
     if(code.buffer) {
-      this.buffer(`${context}.children.push(__RUNTIME__.text(${code.val}))`)
+      this.buffer(`${context}.children.push($$.text(${code.val}))`)
     } else {
       this.buffer(code.val)
     }
@@ -103,6 +124,7 @@ export class Compiler {
       this.undent().buffer('} else {').indent().visit(code.alternate, context)
     }
     this.undent().buffer('}')
+    return this
   }
 }
 

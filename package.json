@@ -22,6 +22,9 @@
     "virtual-dom": "^2.1.1"
   },
   "dependencies": {
+    "babel-core": "^6.20.0",
+    "babel-types": "^6.20.0",
+    "globals": "^9.14.0",
     "pug-lexer": "^2.3.0",
     "pug-parser": "^2.0.1"
   }
