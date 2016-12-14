@@ -4,32 +4,48 @@ class EventHook {
   constructor(events) {
     this.events = events
   }
-  hook(node, prop, previous=[]) {
+  hook(node, prop, self) {
+    var previous = self ? self.events : []
     for(var [event, callback] of previous) {
       node.removeEventListener(event, callback)
     }
     for(var [event, callback] of this.events) {
       node.addEventListener(event, callback)
     }
-    return this.events
   }
-  unhook(...args) {
+  unhook(node) {
     for(var [event, callback] of this.events) {
       node.removeEventListener(event, callback)
     }
   }
 }
 
+class PropertyHook {
+  constructor(value) {
+    this.value = value
+  }
+  hook(node, property, self) {
+    var previous = self && self.value
+    if(!previous && this.value !== undefined || this.value !== previous) {
+      node[property] = this.value
+    }
+  }
+}
+
 class HandleHook {
-  constructor(context, name) {
+  constructor(context, names) {
     this.context = context
-    this.name = name
+    this.names = names
   }
   hook(node, prop, previous) {
-    this.context[this.name] = node
+    for(var name of this.names) {
+      this.context[name] = node
+    }
   }
   unhook() {
-    this.context[this.name] = null
+    for(var name of this.names) {
+      this.context[name] = null
+    }
   }
 }
 
@@ -41,18 +57,17 @@ class VDomRuntime extends PugRuntime {
     this.VText = VText
   }
   element(tagName, properties) {
-    const attrs = properties.attributes
-    properties.events = new EventHook(properties.events)
-
-    if(attrs.class) {
-      attrs.class = this.attr([attrs.class, properties.class])
-    } else {
-      attrs.class = this.attr(properties.class)
-    }
+    if(tagName === 'ft-fixtures') console.log(properties)
     return new this.VNode(tagName, properties, properties.children)
   }
-  handle(context, name, node) {
-    node['#'+name] = new HandleHook(context, name)
+  events(context, events) {
+    return new EventHook(events, context)
+  }
+  handles(context, names) {
+    return new HandleHook(context, names)
+  }
+  prop(value) {
+    return new PropertyHook(value)
   }
   text(text) {
     return new this.VText(super.text(text))

@@ -4,9 +4,11 @@ each post, index in posts
     header(title=post.title, (click)=myUpdate(fixtures))
       h1([style.border]='THIN SOLID red')= post.title
     section(class=post.type, [innerHTML]=post.content)
-    footer
+    footer([thing]=new class Test { stuff() {} } )
       if post.user
         i= post.user.name
+      else if post.stuff
+        i stuff
       else
         b Admin
     

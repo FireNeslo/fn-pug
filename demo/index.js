@@ -36,6 +36,7 @@ var app = {
   }
 }
 
+console.log(app.template.toString())
 
 const view = h('body', app.template())
 

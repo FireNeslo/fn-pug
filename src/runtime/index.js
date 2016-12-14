@@ -26,22 +26,30 @@ function objectIterator(object, callback) {
 
 
 export class PugRuntime {
-  event(context, value) {
+  events(context, value) {
     return value
   }
   element(tagName, properties) {
     return Object.assign({tagName}, properties)
   }
-  handle(context, handle, element) {
-    context[handle] = element
+  handles(context, handles) {
+    return handles
   }
   text(text) {
     return text != null ? text : ''
   }
+  attrs(values) {
+    if(values.class) {
+      values.class = this.attrs(values.class)
+    }
+    for(var attr in values) {
+      if(!values[attr]) delete values[attr]
+    }
+    return values
+  }
   attr(value) {
-    if(value == null) return ''
+    if(!value) return ''
     if(Array.isArray(value)) return value.map(this.attr, this).join(' ')
-
     if(typeof value === 'object') {
       var result = []
       for(var key in value) {

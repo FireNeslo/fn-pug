@@ -21,7 +21,6 @@ export class Compiler {
   compile(tree, options) {
     this.compileSource(tree)
     const {code, ast} = transformContext(this.code, this.options.src)
-    console.log(code)
     return Object.assign(this, {code, ast})
   }
   buffer(code, newline=true) {
@@ -63,7 +62,7 @@ export class Compiler {
     var node = `e$${this.uid++}`
     var name = JSON.stringify(tag.name)
 
-    this.buffer(`var ${node} = {children: [], events: [], attributes: {}, class: {}, style: {}}`)
+    this.buffer(`var ${node} = {children: [], class: {}, style: {}}`)
 
     this.visitAttributes(tag.attrs, node)
 
@@ -74,34 +73,42 @@ export class Compiler {
     return this.buffer(`${context}.children.push(${element})`)
   }
   visitAttributes(attrs, context) {
+    const EVENTS = []
+    const HANDLES = []
+    const ATTRIBUTES = []
+
     for(var {name, val} of attrs) {
       switch (name[0]) {
         case "#":
-          var handle = JSON.stringify(name.slice(1))
-          this.buffer(`$$.handle(this, ${handle}, ${context})`)
+          HANDLES.push(`${JSON.stringify(name.slice(1))}`)
         break;
         case "(":
           var event = JSON.stringify(name.slice(1, -1))
-          var value = `$$.event(this, e => ${val})`
-          this.buffer(`${context}.events.push([${event}, ${value}])`)
+          EVENTS.push(`[${event}, e => ${val}]`)
           break;
         case "[":
           if(name[1] === '(') {
             var key = name.slice(2, -2)
             var event = JSON.stringify(key + 'Changed')
-            var value = `$$.event(this, e => ${val} = e.target.${key})`
-            this.buffer(`${context}.${key} = ${val}`)
-            this.buffer(`${context}.events.push([${event}, ${value}])`)
+            this.buffer(`${context}.${key} = $$.prop(${val})`)
+            EVENTS.push(`[${event}, e => ${val} = e.target.${key}]`)
           } else {
-            this.buffer(`${context}.${name.slice(1, -1)} = ${val}`)
+            this.buffer(`${context}.${name.slice(1, -1)} = $$.prop(${val})`)
           }
           break;
         default:
-          var attr = JSON.stringify(name)
-          var value = `$$.attr(${val})`
-          this.buffer(`${context}.attributes[${attr}] = ${value}`)
+          ATTRIBUTES.push(`${JSON.stringify(name)}: ${val}`)
           break;
       }
+    }
+    if(ATTRIBUTES.length) {
+      this.buffer(`${context}.attributes = $$.attrs({${ATTRIBUTES}})`)
+    }
+    if(HANDLES.length) {
+      this.buffer(`${context}.handles = $$.handles(this, [${HANDLES}])`)
+    }
+    if(EVENTS.length) {
+      this.buffer(`${context}.events = $$.events(this, [${EVENTS}])`)
     }
   }
   visitComment(comment) {
@@ -120,10 +127,14 @@ export class Compiler {
   visitConditional(code, context) {
     this.buffer(`if(${code.test}) {`).indent()
     this.visit(code.consequent, context)
-    if(code.alternate && code.alternate.nodes.length) {
-      this.undent().buffer('} else {').indent().visit(code.alternate, context)
-    }
     this.undent().buffer('}')
+    if(code.alternate) {
+      this.buffer(' else {').
+        indent().
+          visit(code.alternate, context).
+        undent().
+      buffer('}')
+    }
     return this
   }
 }
