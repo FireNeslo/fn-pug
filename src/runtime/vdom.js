@@ -57,7 +57,6 @@ class VDomRuntime extends PugRuntime {
     this.VText = VText
   }
   element(tagName, properties) {
-    if(tagName === 'ft-fixtures') console.log(properties)
     return new this.VNode(tagName, properties, properties.children)
   }
   events(context, events) {

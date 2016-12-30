@@ -75,7 +75,7 @@ export class Compiler {
   visitAttributes(attrs, context) {
     const EVENTS = []
     const HANDLES = []
-    const ATTRIBUTES = []
+    const ATTRIBUTES = {}
 
     for(var {name, val} of attrs) {
       switch (name[0]) {
@@ -97,12 +97,23 @@ export class Compiler {
           }
           break;
         default:
-          ATTRIBUTES.push(`${JSON.stringify(name)}: ${val}`)
+          if(!ATTRIBUTES[name]) {
+            ATTRIBUTES[name] = []
+          }
+          ATTRIBUTES[name].push(val)
           break;
       }
     }
-    if(ATTRIBUTES.length) {
-      this.buffer(`${context}.attributes = $$.attrs({${ATTRIBUTES}})`)
+    if(Object.keys(ATTRIBUTES).length) {
+      var attributes = Object.keys(ATTRIBUTES)
+        .map(attr => {
+          var value = ATTRIBUTES[attr]
+          if(value.length === 1) {
+            return `${JSON.stringify(attr)}: ${value}`
+          }
+          return `${JSON.stringify(attr)}: [${value}]`
+        })
+      this.buffer(`${context}.attributes = $$.attrs({${attributes}})`)
     }
     if(HANDLES.length) {
       this.buffer(`${context}.handles = $$.handles(this, [${HANDLES}])`)

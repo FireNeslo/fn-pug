@@ -40,10 +40,11 @@ export class PugRuntime {
   }
   attrs(values) {
     if(values.class) {
-      values.class = this.attrs(values.class)
+      values.class = this.attr(values.class)
     }
     for(var attr in values) {
       if(!values[attr]) delete values[attr]
+      else values[attr] = values[attr] + ''
     }
     return values
   }
@@ -59,7 +60,6 @@ export class PugRuntime {
       }
       return result.join(' ')
     }
-
     return value + ''
   }
   each(iterable, callback) {
