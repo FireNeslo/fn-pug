@@ -35,6 +35,9 @@ export class PugRuntime {
   handles(context, handles) {
     return handles
   }
+  prop(value) {
+    return value
+  }
   text(text) {
     return text != null ? text : ''
   }
