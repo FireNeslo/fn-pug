@@ -20,7 +20,7 @@ class SnabbRuntime extends PugRuntime {
     context.hook = {
       insert(vnode) {
         for(var handle of handles) {
-          context[handle] = vnode.elm
+          self[handle] = vnode.elm
         }
       }
     }
