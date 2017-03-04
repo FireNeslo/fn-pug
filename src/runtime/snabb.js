@@ -5,24 +5,19 @@ class SnabbRuntime extends PugRuntime {
     super()
     this.h = h
   }
-  element(tagName, properties) {
-    const on = properties.events
-    const hook = properties.handles
-    const attrs = properties.attributes
-    const style = properties.style
-    const children = properties.children
-    const props = properties
+  element(properties) {
+    const {tagName, children} = properties
 
-    delete props.style
-    delete props.events
-    delete props.children
-    delete props.attributes
-    delete props.handles
+    delete properties.tagName
+    delete properties.children
 
-    return this.h(tagName, {on, attrs, hook, props, style, children}, children)
+    return this.h(tagName, properties, children)
   }
-  handles(context, handles) {
-    return {
+  attrs(context, attrs) {
+    super.attrs({ attributes: context.attrs = {}}, attrs)
+  }
+  handles(context, self, handles) {
+    context.hook = {
       insert(vnode) {
         for(var handle of handles) {
           context[handle] = vnode.elm
@@ -30,12 +25,28 @@ class SnabbRuntime extends PugRuntime {
       }
     }
   }
-  events(context, events) {
-    var on = {}
-    events.forEach(event => {
-      on[event[0]] = event[1]
-    })
-    return on
+  events(context, self, events) {
+    var on = context.on = {}
+    for(var [event, handler] of events) {
+      on[event] = handler
+    }
+  }
+  props(context, props) {
+    if(props.style) {
+      context.style = props.style
+      delete props.style
+    }
+    if(props.class) {
+      context.class = props.class, props.className
+      if(context.attrs.class) {
+        for(let className of context.attrs.class.split(' ')) {
+          context.class[className] = true
+        }
+      }
+      delete context.attrs.class
+      delete props.class
+    }
+    context.props = Object.assign(context.props || {}, props)
   }
 }
 

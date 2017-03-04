@@ -2,7 +2,10 @@ import {transform} from 'babel-core'
 import {memberExpression, identifier} from 'babel-types'
 import {builtin, browser, commonjs} from 'globals'
 
-const GLOBALS = Object.assign(builtin, browser, commonjs)
+const GLOBALS = Object.assign(Object.create(null), builtin, browser, commonjs)
+
+delete GLOBALS.name
+delete GLOBALS.constructor
 
 export default function transformContext(code, source) {
   return transform(code, {

@@ -26,30 +26,40 @@ function objectIterator(object, callback) {
 
 
 export class PugRuntime {
+  init() {
+    return this.create()
+  }
+  create(tagName) {
+    return { tagName: tagName, children: []}
+  }
+  child(parent, node) {
+    if(!parent.children) debugger
+    parent.children.push(node)
+  }
   events(context, value) {
     return value
   }
-  element(tagName, properties) {
-    return Object.assign({tagName}, properties)
+  element(properties) {
+    return properties
   }
-  handles(context, handles) {
-    return handles
+  handles(value, context, name) {
+    value.handle = [context, name]
   }
-  prop(value) {
-    return value
+  props(target, source) {
+    return Object.assign(target, source)
   }
   text(text) {
-    return text != null ? text : ''
+    return text != null ? (text + '') : ''
   }
-  attrs(values) {
-    if(values.class) {
-      values.class = this.attr(values.class)
+  attrs(target, attrs) {
+    target.attributes || (target.attributes = {})
+    for(var attr in attrs) {
+      if(!attrs[attr]) continue
+      target.attributes[attr] = attrs[attr] + ''
     }
-    for(var attr in values) {
-      if(!values[attr]) delete values[attr]
-      else values[attr] = values[attr] + ''
+    if(attrs.class) {
+      target.attributes.class = this.attr(attrs.class)
     }
-    return values
   }
   attr(value) {
     if(!value) return ''
@@ -76,6 +86,9 @@ export class PugRuntime {
     } else {
       return objectIterator(iterable, callback)
     }
+  }
+  end(result) {
+    return result.children
   }
 }
 

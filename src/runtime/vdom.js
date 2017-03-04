@@ -56,17 +56,37 @@ class VDomRuntime extends PugRuntime {
     this.VNode = VNode
     this.VText = VText
   }
-  element(tagName, properties) {
-    return new this.VNode(tagName, properties, properties.children)
+  element(properties) {
+    return new this.VNode(properties.tagName, properties, properties.children)
   }
-  events(context, events) {
-    return new EventHook(events, context)
+  events(value, context, events) {
+    return value.events = new EventHook(events, context)
   }
-  handles(context, names) {
-    return new HandleHook(context, names)
+  handles(value, context, name) {
+    value.handle  = new HandleHook(context, name)
   }
-  prop(value) {
-    return new PropertyHook(value)
+  props(context, value) {
+    for(var key of Object.keys(value)) {
+      switch (key) {
+        case "class":
+          var className = this.attr(value[key])
+          if(!className) continue
+          if(context.attributes && context.attributes.class) {
+            className = context.attributes.class + ' ' + className
+            delete context.attributes.class
+          }
+          if(context.className) {
+            className += ' ' + context.className
+          }
+          context.className = className
+        break;
+        case "style":
+          context[key] = value[key]
+        break;
+        default:
+          context[key] = new PropertyHook(value[key])
+      }
+    }
   }
   text(text) {
     return new this.VText(super.text(text))

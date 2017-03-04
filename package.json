@@ -19,6 +19,8 @@
     "babel-preset-stage-0": "^6.16.0",
     "babelify": "^7.3.0",
     "budo": "^9.3.0",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
     "snabbdom": "^0.5.4",
     "stringify": "^5.1.0",
     "virtual-dom": "^2.1.1"
@@ -26,8 +28,10 @@
   "dependencies": {
     "babel-core": "^6.20.0",
     "babel-types": "^6.20.0",
+    "flat": "^2.0.1",
     "globals": "^9.14.0",
     "pug-lexer": "^2.3.0",
-    "pug-parser": "^2.0.1"
+    "pug-parser": "^2.0.1",
+    "through2": "^2.0.3"
   }
 }

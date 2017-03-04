@@ -1,15 +1,13 @@
 each post, index in posts
   - var item = post
   article(class={wide: index % 2 === 0 }, [class.active]=selected === index)
-    header(title=post.title, (click)=myUpdate(fixtures))
+    header(#header, title=post.title, (click)=select(item))
       h1([style.border]='THIN SOLID red')= post.title
     section(class=post.type, [innerHTML]=post.content)
-    footer([thing]=new class Test { stuff() {} } )
+    footer
       if post.user
         i= post.user.name
       else if post.stuff
         i stuff
       else
         b Admin
-    
-    ft-fixures(#fixtures)

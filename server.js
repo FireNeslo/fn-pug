@@ -1,10 +1,10 @@
-var budo = require('budo')
-var stringify = require('stringify')
-var babelify = require('babelify')
+const budo = require('budo')
+const stringify = require('stringify')
+const babelify = require('babelify')
 
+const demo = process.argv[2] || 'index'
 
-
-budo('./demo/index.js', {
+budo(`./demo/${demo}.js`, {
   live: true,             // live reload
   open: true,             // open browser
   stream: process.stdout, // log to stdout

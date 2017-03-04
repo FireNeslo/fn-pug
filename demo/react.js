@@ -1,18 +1,8 @@
 import {compileClient} from '../src'
-import snabbdom from 'snabbdom'
-import h from 'snabbdom/h'
-
-import runtime from '../src/runtime/snabb'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import runtime from '../src/runtime/react'
 import input from './demo.pug'
-
-const modules = [ // Init patch function with chosen modules
-  require('snabbdom/modules/class'), // makes it easy to toggle classes
-  require('snabbdom/modules/props'), // for setting properties on DOM elements
-  require('snabbdom/modules/style'), // handles styling on elements with support for animations
-  require('snabbdom/modules/eventlisteners'), // attaches event listeners
-]
-
-const patch = snabbdom.init(modules);
 
 function content() {
   var paragraphs = Math.floor(Math.random() * 3) + 1
@@ -33,21 +23,25 @@ function content() {
   return contents
 }
 
-var app = {
-  template: compileClient(input, runtime(h)),
+var app = global.app = {
+  template: compileClient(input, runtime(React)),
   selected: 0,
   posts: [
     {title: 'hello', content: content()},
     {title: 'world', content: content()},
     {title: 'neat', content: content()}
   ],
-  select(item) {
-    console.log("selected:", item)
+  select(selected) {
+    console.log("selected:", selected)
   }
 }
+const root = document.createElement('react-root')
+
+document.body.appendChild(root)
 
 console.log(app.template.toString())
 
-const view = h('body', app.template())
-
-patch(document.body, view)
+ReactDOM.render(
+  React.createElement('main', null, app.template()),
+  root
+);

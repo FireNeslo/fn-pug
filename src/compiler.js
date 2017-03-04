@@ -1,5 +1,7 @@
 import transformContext from './helpers/transform-context'
+import objectString from './helpers/object-string'
 
+import {unflatten} from 'flat'
 
 export class Compiler {
   compileSource(ast, options={}) {
@@ -10,11 +12,11 @@ export class Compiler {
     this.uid = 0
 
     return this.
-      buffer('function template() {').
+      buffer('function template(__INIT__) {').
         indent().
-          buffer('var __RESULT__ = {children: []}').
+          buffer('var __RESULT__ = $$.init(this, __INIT__)').
           visit(ast, '__RESULT__').
-          buffer('return __RESULT__.children').
+          buffer('return $$.end(__RESULT__)').
         undent().
       buffer('}')
   }
@@ -62,20 +64,21 @@ export class Compiler {
     var node = `e$${this.uid++}`
     var name = JSON.stringify(tag.name)
 
-    this.buffer(`var ${node} = {children: [], class: {}, style: {}}`)
+    this.buffer(`var ${node} = $$.create(${name})`)
 
     this.visitAttributes(tag.attrs, node)
 
     if(tag.block) this.visit(tag.block, node)
 
-    var element = `$$.element(${name}, ${node})`
+    var element = `$$.element(${node})`
 
-    return this.buffer(`${context}.children.push(${element})`)
+    return this.buffer(`$$.child(${context}, ${element})`)
   }
   visitAttributes(attrs, context) {
     const EVENTS = []
     const HANDLES = []
     const ATTRIBUTES = {}
+    const PROPERTIES = {}
 
     for(var {name, val} of attrs) {
       switch (name[0]) {
@@ -90,36 +93,30 @@ export class Compiler {
           if(name[1] === '(') {
             var key = name.slice(2, -2)
             var event = JSON.stringify(key + 'Changed')
-            this.buffer(`${context}.${key} = $$.prop(${val})`)
+            PROPERTIES[key] = val
             EVENTS.push(`[${event}, e => ${val} = e.target.${key}]`)
           } else {
-            this.buffer(`${context}.${name.slice(1, -1)} = $$.prop(${val})`)
+            PROPERTIES[name.slice(1, -1)] = val
           }
           break;
         default:
-          if(!ATTRIBUTES[name]) {
-            ATTRIBUTES[name] = []
-          }
-          ATTRIBUTES[name].push(val)
+          ATTRIBUTES[name] = val
           break;
       }
     }
     if(Object.keys(ATTRIBUTES).length) {
-      var attributes = Object.keys(ATTRIBUTES)
-        .map(attr => {
-          var value = ATTRIBUTES[attr]
-          if(value.length === 1) {
-            return `${JSON.stringify(attr)}: ${value}`
-          }
-          return `${JSON.stringify(attr)}: [${value}]`
-        })
-      this.buffer(`${context}.attributes = $$.attrs({${attributes}})`)
+      var attributes = objectString(ATTRIBUTES)
+      this.buffer(`$$.attrs(${context}, ${attributes})`)
+    }
+    if(Object.keys(PROPERTIES).length) {
+      var properties = objectString(unflatten(PROPERTIES))
+      this.buffer(`$$.props(${context}, ${properties})`)
     }
     if(HANDLES.length) {
-      this.buffer(`${context}.handles = $$.handles(this, [${HANDLES}])`)
+      this.buffer(`$$.handles(${context}, this, [${HANDLES}])`)
     }
     if(EVENTS.length) {
-      this.buffer(`${context}.events = $$.events(this, [${EVENTS}])`)
+      this.buffer(`$$.events(${context}, this, [${EVENTS}])`)
     }
   }
   visitComment(comment) {
@@ -130,7 +127,7 @@ export class Compiler {
   }
   visitCode(code, context) {
     if(code.buffer) {
-      this.buffer(`${context}.children.push($$.text(${code.val}))`)
+      this.buffer(`$$.child(${context}, $$.text(${code.val}))`)
     } else {
       this.buffer(code.val)
     }

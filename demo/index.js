@@ -31,8 +31,8 @@ var app = {
     {title: 'world', content: content()},
     {title: 'neat', content: content()}
   ],
-  myUpdate(fixtures) {
-    console.log("update", fixtures)
+  select(header) {
+    console.log("selected:", header)
   }
 }
 
