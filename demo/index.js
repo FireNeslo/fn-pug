@@ -1,8 +1,6 @@
 import {compileClient} from '../src'
-import {VNode, VText, h, diff, patch} from 'virtual-dom'
 
-import runtime from '../src/runtime/vdom'
-import input from './demo.pug'
+import template from './demo.pug'
 
 function content() {
   var paragraphs = Math.floor(Math.random() * 3) + 1
@@ -23,21 +21,16 @@ function content() {
   return contents
 }
 
-var app = {
-  template: compileClient(input, runtime({VNode, VText})),
-  selected: 0,
-  posts: [
-    {title: 'hello', content: content()},
-    {title: 'world', content: content()},
-    {title: 'neat', content: content()}
-  ],
-  select(header) {
-    console.log("selected:", header)
+export default function(runtime) {
+  return {
+    template: compileClient(template, runtime),
+    posts: [
+      {title: 'hello', content: content()},
+      {title: 'world', content: content()},
+      {title: 'neat', content: content()}
+    ],
+    select(header) {
+      console.log("selected:", header)
+    }
   }
 }
-
-console.log(app.template.toString())
-
-const view = h('body', app.template())
-
-patch(document.body, diff(h('body'), view))

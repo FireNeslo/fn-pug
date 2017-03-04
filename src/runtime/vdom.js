@@ -51,13 +51,12 @@ class HandleHook {
 
 
 class VDomRuntime extends PugRuntime {
-  constructor({VNode, VText}) {
+  constructor(h) {
     super()
-    this.VNode = VNode
-    this.VText = VText
+    this.h = h
   }
   element(properties) {
-    return new this.VNode(properties.tagName, properties, properties.children)
+    return this.h(properties.tagName, properties, properties.children)
   }
   events(value, context, events) {
     return value.events = new EventHook(events, context)
@@ -87,9 +86,6 @@ class VDomRuntime extends PugRuntime {
           context[key] = new PropertyHook(value[key])
       }
     }
-  }
-  text(text) {
-    return new this.VText(super.text(text))
   }
 }
 
