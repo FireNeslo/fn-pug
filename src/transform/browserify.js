@@ -5,10 +5,10 @@ import fnPug from '..'
 const root = 'fn-pug/lib/runtime'
 
 const RUNTIMES = {
-  'vdom': `require('${root}/vdom').default(require('virtual-dom'))`,
+  'dom': `require('${root}/dom').default(document)`,
   'virtual-dom': `require('${root}/vdom').default(require('virtual-dom'))`,
   'snabbdom': `require('${root}/snabb').default(require('snabbdom/h').default)`,
-  'snabb': `require('${root}/snabb').default(require('snabbdom/h').default)`
+  'react': `require('${root}/react').default(require('react'))`
 }
 
 module.exports = function browserify(file, options={}) {
