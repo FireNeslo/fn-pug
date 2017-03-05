@@ -23,6 +23,7 @@ function content() {
 
 export default function(runtime) {
   return {
+    selected: 0,
     template: compileClient(template, runtime),
     posts: [
       {title: 'hello', content: content()},

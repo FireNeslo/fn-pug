@@ -14,19 +14,9 @@ class ReactRuntime extends PugRuntime {
     if(!props.key) {
       props.key = Math.random()
     }
-    if(props.class) {
-      props.className = this.attr(props.class)
-      delete props.class
-    }
-
-    if(props.innerHTML) {
-
-      props.dangerouslySetInnerHTML  = { __html: props.innerHTML }
-      delete props.innerHTML
-
+    if(props.dangerouslySetInnerHTML) {
       return this.React.createElement(tagName, props)
     }
-
     return this.React.createElement(tagName, props, children)
   }
   attrs(attributes, attrs) {
@@ -34,6 +24,35 @@ class ReactRuntime extends PugRuntime {
   }
   handles(value, context, name) {
     value.ref = node => context[name] = node
+  }
+  props(target, props) {
+    if(target.class) {
+      if(target.className) {
+        target.className = [target.className, target.class].join(' ')
+      } else {
+        target.className = target.class
+      }
+      delete target.class
+    }
+    for(let key of Object.keys(props)) {
+      switch(key) {
+        case "innerHTML":
+          target.dangerouslySetInnerHTML  = { __html: props[key] }
+        break;
+        case "class":
+          var className = this.attr(props[key])
+          if(!className) continue
+          if(target.className) {
+            className += ' ' + target.className
+          }
+          target.className = className
+        break;
+        default:
+          target[key] = props[key]
+        break;
+      }
+    }
+
   }
   events(context, self, events) {
     var on = context

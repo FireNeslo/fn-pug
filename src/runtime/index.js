@@ -53,12 +53,12 @@ export class PugRuntime {
   }
   attrs(target, attrs) {
     target.attributes || (target.attributes = {})
+    if(attrs.class) {
+      attrs.class = this.attr(attrs.class)
+    }
     for(var attr in attrs) {
       if(!attrs[attr]) continue
       target.attributes[attr] = attrs[attr] + ''
-    }
-    if(attrs.class) {
-      target.attributes.class = this.attr(attrs.class)
     }
   }
   attr(value) {
