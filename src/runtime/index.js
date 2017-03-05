@@ -75,6 +75,9 @@ export class PugRuntime {
     }
     return value + ''
   }
+  mixin(parent, self, mixin, ...args) {
+    this.child(parent, mixin.call(Object.assign(Object.create(self), ...args)))
+  }
   each(iterable, callback) {
     if(!iterable) return
     if(Array.isArray(iterable)) {

@@ -22,13 +22,17 @@ function content() {
 }
 
 export default function(runtime) {
+  const TEMPLATE = compileClient(template, runtime)
+  console.log(TEMPLATE+'')
   return {
     selected: 0,
-    template: compileClient(template, runtime),
+    template: TEMPLATE,
     posts: [
       {title: 'hello', content: content()},
       {title: 'world', content: content()},
-      {title: 'neat', content: content()}
+      {title: 'neat', content: content(), posts: [
+        {title: 'nested', content:  content()} 
+      ]}
     ],
     select(header) {
       console.log("selected:", header)

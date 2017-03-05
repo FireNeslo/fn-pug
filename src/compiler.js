@@ -145,6 +145,24 @@ export class Compiler {
     }
     return this
   }
+  visitMixin(mixin, context) {
+    const ATTRIBUTES = {}
+    var attributes = ''
+    if(mixin.attrs.length) {
+      for(let {name, val} of mixin.attrs) {
+        ATTRIBUTES[name] = val
+      }
+      attributes = objectString(ATTRIBUTES)
+    }
+    if(mixin.args) {
+      attributes += (attributes ? ',' : '' ) + mixin.args
+    }
+    if(attributes) {
+      this.buffer(`$$.mixin(${context}, this, ${mixin.name}, ${attributes})`)
+    } else {
+      this.buffer(`$$.mixin(${context}, this, ${mixin.name})`)
+    }
+  }
 }
 
 export default function compile(ast, options) {

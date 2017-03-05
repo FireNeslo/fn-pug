@@ -10,7 +10,7 @@ class StringRuntime extends PugRuntime {
     return { html: '' }
   }
   indent() {
-    if(!this.options.pretty) {
+    if(this.level < 1 || !this.options.pretty) {
       return ''
     }
     return '\n' + '  '.repeat(this.level)
@@ -29,6 +29,7 @@ class StringRuntime extends PugRuntime {
     return indent + (text || '').split('\n').join(indent)
   }
   child(parent, child) {
+    if(parent == null) debugger
     parent.html += child
   }
   attrs(element, attrs) {
