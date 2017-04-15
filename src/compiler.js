@@ -100,7 +100,8 @@ export class Compiler {
           }
           break;
         default:
-          ATTRIBUTES[name] = val
+          if(!ATTRIBUTES[name]) ATTRIBUTES[name] = []
+          ATTRIBUTES[name].push(val)
           break;
       }
     }

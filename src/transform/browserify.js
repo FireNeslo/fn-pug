@@ -8,7 +8,8 @@ const RUNTIMES = {
   'dom': `require('${root}/dom').default(document)`,
   'virtual-dom': `require('${root}/vdom').default(require('virtual-dom/h'))`,
   'snabbdom': `require('${root}/snabb').default(require('snabbdom/h').default)`,
-  'react': `require('${root}/react').default(require('react'))`
+  'react': `require('${root}/react').default(require('react'))`,
+  'vue': `require('${root}/vue').default()`
 }
 
 module.exports = function browserify(file, options={}) {

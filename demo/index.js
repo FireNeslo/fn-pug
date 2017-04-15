@@ -31,7 +31,7 @@ export default function(runtime) {
       {title: 'hello', content: content()},
       {title: 'world', content: content()},
       {title: 'neat', content: content(), posts: [
-        {title: 'nested', content:  content()} 
+        {title: 'nested', content:  content()}
       ]}
     ],
     select(header) {

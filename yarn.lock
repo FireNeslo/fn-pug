@@ -3599,6 +3599,10 @@ vm-browserify@~0.0.1:
   dependencies:
     indexof "0.0.1"
 
+vue@^2.2.6:
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/vue/-/vue-2.2.6.tgz#451714b394dd6d4eae7b773c40c2034a59621aed"
+
 watchify-middleware@^1.6.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/watchify-middleware/-/watchify-middleware-1.6.0.tgz#6db6e28f0279de1ca1209ae4f1a7f063745877c4"
