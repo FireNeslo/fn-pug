@@ -123,6 +123,9 @@ export class Compiler {
   visitComment(comment) {
     this.buffer('// ' + comment.val)
   }
+  visitBlockComment(comment) {
+    this.buffer('/*' + comment.val+'*/')
+  }
   visitText(text, context) {
     this.visitCode({val: `\`${text.val}\``, buffer: true}, context)
   }

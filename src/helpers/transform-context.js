@@ -1,11 +1,12 @@
 import {transform} from 'babel-core'
-import {memberExpression, identifier} from 'babel-types'
+import {memberExpression, variableDeclarator, identifier} from 'babel-types'
 import {builtin, browser, commonjs} from 'globals'
 
 const GLOBALS = Object.assign(Object.create(null), builtin, browser, commonjs)
 
 delete GLOBALS.name
 delete GLOBALS.constructor
+delete GLOBALS.open
 
 export default function transformContext(code, source) {
   return transform(code, {
@@ -32,14 +33,27 @@ export default function transformContext(code, source) {
                }
                path.replaceWith(path.node)
              },
+             CallExpression(path) {
+               var {node, scope} = path
+               if(node.callee.type !== 'Identifier') return
+               if(node.callee.name in GLOBALS) return
+               if(path.scope.hasBinding(node.callee.name)) return
+               if(node.callee.name === 'this') return
+               if(node.callee.name === '$$') return
+
+               node.callee = memberExpression(identifier('this'), node.callee)
+             },
              ReferencedIdentifier(path) {
                var {node, scope} = path
                if(node.name in GLOBALS) return
                if(path.scope.hasBinding(node.name)) return
                if(node.name === 'this') return
                if(node.name === '$$') return
-               var context = memberExpression(identifier('this'), node)
-               path.replaceWith(context)
+
+               scope.push(variableDeclarator(
+                 identifier(node.name),
+                 memberExpression(identifier('this'), identifier(node.name))
+               ));
              }
            }
          }

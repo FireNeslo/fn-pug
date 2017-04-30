@@ -49,7 +49,6 @@ class HandleHook {
   }
 }
 
-
 class VDomRuntime extends PugRuntime {
   constructor(h) {
     super()
@@ -63,6 +62,19 @@ class VDomRuntime extends PugRuntime {
   }
   handles(value, context, name) {
     value.handle  = new HandleHook(context, name)
+  }
+  text(text) {
+    if(text && text.type === 'VirtualNode') {
+      return text
+    }
+    return super.text(text)
+  }
+  attrs(context, value) {
+    if(typeof value.style === 'object') {
+      context.style = value.style
+      delete value.style
+    }
+    return super.attrs(context, value)
   }
   props(context, value) {
     for(var key of Object.keys(value)) {

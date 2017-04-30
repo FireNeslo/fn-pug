@@ -6,6 +6,7 @@ const root = 'fn-pug/lib/runtime'
 
 const RUNTIMES = {
   'dom': `require('${root}/dom').default(document)`,
+  'string': `require('${root}/string').default()`,
   'virtual-dom': `require('${root}/vdom').default(require('virtual-dom/h'))`,
   'snabbdom': `require('${root}/snabb').default(require('snabbdom/h').default)`,
   'react': `require('${root}/react').default(require('react'))`,
