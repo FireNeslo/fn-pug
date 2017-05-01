@@ -17,7 +17,7 @@ class ReactRuntime extends PugRuntime {
     if(props.dangerouslySetInnerHTML) {
       return this.React.createElement(tagName, props)
     }
-    return this.React.createElement(tagName, props, children)
+    return this.React.createElement(tagName, props, (children.length && children) || null)
   }
   attrs(attributes, attrs) {
     super.attrs({ attributes }, attrs)

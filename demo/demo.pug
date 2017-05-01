@@ -1,3 +1,12 @@
+
+
+form((submit)=newRender(e))
+  label
+    | Search input
+    input(type="text")
+  button((click)=newRender(e))
+    | Re render
+
 each post, index in posts
   - var item = post
   article(class={wide: index % 2 === 0 }, [class.active]=selected === index)
