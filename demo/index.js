@@ -1,7 +1,3 @@
-import {compileClient} from '../src'
-
-import template from './demo.pug'
-
 function content() {
   var paragraphs = Math.floor(Math.random() * 3) + 1
   var contents = ''
@@ -21,12 +17,9 @@ function content() {
   return contents
 }
 
-export default function(runtime) {
-  const TEMPLATE = compileClient(template, runtime)
-  console.log(TEMPLATE+'')
+export default function() {
   return {
     selected: 0,
-    template: TEMPLATE,
     posts: [
       {title: 'hello', content: content()},
       {title: 'world', content: content()},
@@ -36,6 +29,10 @@ export default function(runtime) {
     ],
     select(header) {
       console.log("selected:", header)
+    },
+    newRender(e) {
+      e.preventDefault()
+      console.log("new Render method needs to be binded")
     }
   }
 }
