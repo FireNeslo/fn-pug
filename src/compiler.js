@@ -1,16 +1,24 @@
+import {SourceMapGenerator} from 'source-map'
 import transformContext from './helpers/transform-context'
 import objectString from './helpers/object-string'
+import path from 'path'
 
 import {unflatten} from 'flat'
 
 export class Compiler {
   compileSource(ast, options={}) {
     this.level = 0
+    this.line = 1
     this.options = options
+    this.file = options.file || 'template.pug'
     this.ast = ast
+    this.map = new SourceMapGenerator({
+      file: path.basename(this.file),
+      sourceRoot: path.dirname(this.file)
+    })
     this.code = ''
     this.uid = 0
-
+    this.map.setSourceContent(this.file, options.src)
     return this.
       buffer('function template(__INIT__) {').
         indent().
@@ -21,13 +29,25 @@ export class Compiler {
       buffer('}')
   }
   compile(tree, options) {
-    this.compileSource(tree)
-    const {code, ast} = transformContext(this.code, this.options.src)
-    return Object.assign(this, {code, ast})
+    this.compileSource(tree, options)
+    const {code, ast, map} = transformContext(this.code, this.map)
+    return Object.assign(this, {code, ast, map})
   }
   buffer(code, newline=true) {
     var indent = '  '.repeat(this.level)
-    this.code += `${indent}${code}${newline ? '\n' : ''}`
+    var code = `${indent}${code}${newline ? '\n' : ''}`
+
+    if(this.node) {
+      this.map.addMapping({
+        name: this.node.name,
+        source: this.file,
+        original: { line: this.node.line, column: 0},
+        generated: { line: this.line, column: 0}
+      })
+    }
+
+    this.line += code.match(/\n/g).length
+    this.code += code
     return this
   }
   indent() {
@@ -38,6 +58,9 @@ export class Compiler {
   }
   visit(node, context) {
     var type = 'visit' + node.type
+
+    this.node = node
+    this.node.context = context
     if(this[type]) {
       this[type](node, context)
     } else {

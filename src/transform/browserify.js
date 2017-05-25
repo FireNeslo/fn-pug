@@ -18,7 +18,7 @@ module.exports = function browserify(file, options={}) {
 
   if(extensions.indexOf(path.extname(file)) < 0) return through()
 
-  const runtime = RUNTIMES[options.runtime || 'vdom'] || options.runtime
+  const runtime = RUNTIMES[options.runtime || 'virtual-dom'] || options.runtime
   const content = []
 
   function collect(buffer, encoding, next) {
@@ -28,6 +28,8 @@ module.exports = function browserify(file, options={}) {
 
   function transform(done) {
     try {
+      options.file = file
+
       const source = Buffer.concat(content).toString()
       const header =`var $$ = ${runtime}`
       const template = fnPug(source, options)
