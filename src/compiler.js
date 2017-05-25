@@ -12,10 +12,7 @@ export class Compiler {
     this.options = options
     this.file = options.file || 'template.pug'
     this.ast = ast
-    this.map = new SourceMapGenerator({
-      file: path.basename(this.file),
-      sourceRoot: path.dirname(this.file)
-    })
+    this.map = new SourceMapGenerator({ file: this.file  })
     this.code = ''
     this.uid = 0
     this.map.setSourceContent(this.file, options.src)
