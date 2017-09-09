@@ -55,7 +55,11 @@ class VDomRuntime extends PugRuntime {
     this.h = h
   }
   element(properties) {
-    return this.h(properties.tagName, properties, properties.children)
+    const tagName = properties.tagName
+    const children = properties.children
+    delete properties.tagName
+    delete properties.children
+    return this.h(tagName, properties, children)
   }
   events(value, context, events) {
     return value.events = new EventHook(events, context)

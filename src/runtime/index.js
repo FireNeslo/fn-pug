@@ -57,7 +57,7 @@ export class PugRuntime {
       attrs.class = this.attr(attrs.class)
     }
     for(var attr in attrs) {
-      if(!attrs[attr]) continue
+      if(attrs[attr] === false || attrs[attr] == null) continue
       target.attributes[attr] = attrs[attr] + ''
     }
   }
