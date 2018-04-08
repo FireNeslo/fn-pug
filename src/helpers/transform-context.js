@@ -57,12 +57,17 @@ export default function transformContext(code, map) {
           },
           ReferencedIdentifier(path) {
             var {node, scope} = path
+
             if(node.name in GLOBALS) return
             if(scope.hasBinding(node.name)) return
             if(node.name === 'this') return
             if(node.name === '$$') return
 
-            referenced.set(scope, node.name)
+            if(!referenced.has(scope)) {
+              referenced.set(scope, new Set())
+            }
+
+            referenced.get(scope).add(node.name)
           },
           Program: {
             exit(path) {
@@ -70,13 +75,15 @@ export default function transformContext(code, map) {
                 path.node.body.unshift(node)
               }
 
-              for(const [scope, name] of referenced) {
-                if(scope.hasBinding(name)) continue
+              for(const [scope, bindings] of referenced) {
+                for(const name of bindings) {
+                  if(scope.hasBinding(name)) continue
 
-                scope.push(variableDeclarator(
-                  identifier(name),
-                  memberExpression(identifier('this'), identifier(name))
-                ))
+                  scope.push(variableDeclarator(
+                    identifier(name),
+                    memberExpression(identifier('this'), identifier(name))
+                  ))
+                }
               }
             }
           }

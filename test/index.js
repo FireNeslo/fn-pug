@@ -70,4 +70,18 @@ describe('fnPug(source)', () => {
     const { file, code } = fnPug('- import test from "./test"')
     assert.include(code, 'import test from "./test";\nfunction template')
   })
+
+
+  it('hoist all referenced variables', () => {
+    const { file, code } = fnPug(`
+        h1 Count #{count}
+        button((click)=increment()) +
+        button((click)=decrement()) -
+
+        h3 Hello #{this.name}
+        input((input)=name=e.target.value, value=name)
+    `.replace(/\n        /g, '\n'))
+
+    assert.include(code, 'var count')
+  })
 })
