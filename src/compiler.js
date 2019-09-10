@@ -102,9 +102,12 @@ export class Compiler {
 
     for(var {name, val} of attrs) {
       switch (name[0]) {
+        case "*":
+          PROPERTIES[name.slice(1)] = val
+          break;
         case "#":
           HANDLES.push(`${JSON.stringify(name.slice(1))}`)
-        break;
+          break;
         case "(":
           var event = JSON.stringify(name.slice(1, -1))
           EVENTS.push(`[${event}, e => ${val}]`)
